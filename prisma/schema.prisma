@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id   String    @id @default(uuid())
+  name String    @unique
+  role UserRoles @default(EMPLOYEE)
+
+  createdById         String?
+  createdByUser       User?                 @relation("CreatedByUser", fields: [createdById], references: [id])
+  adminOrganizations  Organization[]
+  organizationUserMap OrganizationUserMap[]
+  createdUsers        User[]                @relation("CreatedByUser")
+  projects            Project[]
+  createdTasks        Task[]                @relation("CreatedTasks")
+  assignedTasks       Task[]                @relation("UserTasks")
+
+  @@map("users")
+}
+
+model Organization {
+  id   String @id @default(uuid())
+  name String @unique
+
+  createdBy           User?                 @relation(fields: [createdById], references: [id])
+  createdById         String?
+  organizationUserMap OrganizationUserMap[]
+  projects            Project[]
+
+  @@map("organizations")
+}
+
+model OrganizationUserMap {
+  id String @id @default(uuid())
+
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  createdById    String       @map("created_by_id")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+
+  @@unique([createdById, organizationId])
+  @@map("organization_user_map")
+}
+
+model Project {
+  id             String       @id @default(uuid())
+  name           String       @unique
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  createdById    String       @map("created_by_id")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @map("organization_id")
+  tasks          Task[]
+
+  @@unique([name, organizationId])
+  @@map("projects")
+}
+
+model Task {
+  id        String     @id @default(uuid())
+  dueDate   DateTime   @map("due_date")
+  doneAt    DateTime   @map("done_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  status    StatusEnum @default(CREATED)
+
+  workerId String? @map("worker_id")
+  worker   User?   @relation("UserTasks", fields: [workerId], references: [id])
+
+  createdById String @map("created_by_id")
+  createdBy   User   @relation("CreatedTasks", fields: [createdById], references: [id])
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String  @map("project_id")
+
+  @@map("tasks")
+}
+
+enum UserRoles {
+  ADMIN
+  DIRECTOR
+  EMPLOYEE
+}
+
+enum StatusEnum {
+  CREATED
+  IN_PROCESS
+  DONE
+}
