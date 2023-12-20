@@ -6,6 +6,7 @@
   - You are about to drop the column `group_id` on the `projects` table. All the data in the column will be lost.
   - You are about to drop the column `user_id` on the `projects` table. All the data in the column will be lost.
   - You are about to drop the column `projectId` on the `tasks` table. All the data in the column will be lost.
+  - You are about to drop the column `updated_at` on the `tasks` table. All the data in the column will be lost.
   - You are about to drop the column `user_id` on the `tasks` table. All the data in the column will be lost.
   - A unique constraint covering the columns `[created_by_id,organization_id]` on the table `organization_user_map` will be added. If there are existing duplicate values, this will fail.
   - A unique constraint covering the columns `[name]` on the table `projects` will be added. If there are existing duplicate values, this will fail.
@@ -58,6 +59,7 @@ ADD COLUMN     "organization_id" TEXT NOT NULL;
 
 -- AlterTable
 ALTER TABLE "tasks" DROP COLUMN "projectId",
+DROP COLUMN "updated_at",
 DROP COLUMN "user_id",
 ADD COLUMN     "created_by_id" TEXT NOT NULL,
 ADD COLUMN     "project_id" TEXT NOT NULL;
