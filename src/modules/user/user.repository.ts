@@ -29,7 +29,7 @@ export class UserRepository {
       });
 
       return user;
-    }); 
+    });
   }
 
   async getAdminUser(adminId: string) {
